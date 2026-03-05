@@ -35,25 +35,15 @@ service.interceptors.response.use(
     // 处理业务状态码 200 -- 成功响应
     if (data.code === '200') {
       return data.data
-    } else { // 处理业务状态码 -1 -- 响应超时
-      if (data.code === '-1') {
-        if (!config.url?.includes('/login')) {
-          ElMessage.error(data.msg || '登录过期，请重新登录')
-
-          // 清除登录信息 清除token和用户信息
-          localStorage.removeItem('token')
-          localStorage.removeItem('userInfo')
-          window.location.href = '/auth/login'
-        } else {
-          ElMessage.error(data.msg || '登录过期，请重新登录')
-          return Promise.reject('网络请求失败......')
-        }
-      }
+    } else {
+      // 处理所有非 200 的情况
+      ElMessage.error(data.msg || '请求失败')
+      return Promise.reject(data)
     }
-
   },
   error => {
     // 对响应错误做点什么
+    ElMessage.error('网络请求失败')
     return Promise.reject(error)
   }
 )

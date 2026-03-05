@@ -30,15 +30,6 @@
 <script setup>
 import { reactive, ref, computed } from 'vue'
 
-const formItemAttrs = computed(() => {
-  const {formItem} = props
-  formItem.forEach(item => {
-    item.col = {xs:24,sm:12,md:8,lg:6,xl:6}
-  })
-  return formItem
-})
-const ruleFormRef = ref()
-
 const props = defineProps({
   formItem: {
     type: Array,
@@ -46,7 +37,6 @@ const props = defineProps({
   }
 })
 const emit = defineEmits(['search'])
-
 // 初始的表单数据
 const formData = reactive({})
 const isComp = (comp) => {
@@ -56,6 +46,15 @@ const isComp = (comp) => {
   }[comp]
   // 方括号语法 [comp] 用于 动态访问对象的属性 。当 comp 是变量时，它会被解析为具体的键名，从而获取对应的值
 }
+
+const formItemAttrs = computed(() => {
+  const {formItem} = props
+  formItem.forEach(item => {
+    item.col = {xs:24,sm:12,md:8,lg:6,xl:6}
+  })
+  return formItem
+})
+const ruleFormRef = ref()
 
 const handleSearch = () => {
   // console.log(formData)

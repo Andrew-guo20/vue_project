@@ -37,6 +37,7 @@ import { ref } from 'vue'
 import { Back } from '@element-plus/icons-vue';
 // 引入登录接口
 import { login } from '@/api/admin'
+import { useRouter } from 'vue-router'
 
 // - 在模板中通过 ref="ruleFormRef" 绑定到 <el-form> 组件
 // - 这样可以在脚本中访问到表单的实例对象
@@ -58,6 +59,7 @@ const rules = ref({
 })
 
 // 登录
+const router = useRouter()
 const submitForm = async (formRef) => {
   if(!formRef) return
   await formRef.validate((valid) => {
@@ -71,6 +73,14 @@ const submitForm = async (formRef) => {
         // 登录成功，保存token和用户信息
         localStorage.setItem('token', res.token)
         localStorage.setItem('userInfo', JSON.stringify(res.userInfo))
+
+        // 根据用户角色决定跳转的路径
+        if(res.userInfo.userType === 2) {
+          console.log(1111)
+          router.push('/back/dashboard')
+        } else {
+          
+        }
       })
     } else {
       console.log('表单验证失败')
