@@ -33,7 +33,14 @@
         </template>
       </el-table-column>
     </el-table>
-  </div>
+    <el-pagination
+      style="margin-top: 25px;"
+      layout="prev, pager, next"
+      :total="pagination.total"
+      :page-size="pagination.size"
+      @change="handleChange"
+    />
+     </div>
 </template>
 
 <script setup name="knowledge">
@@ -72,6 +79,7 @@ const pagination = reactive({
   size:10,
   total:0,
 })
+
 // 列表数据
 const tableData = ref([])
 // - 当用户在 TableSearch 组件中点击搜索按钮时，组件会触发 search 事件
@@ -91,6 +99,12 @@ const handleSearch = async (formData = {}) => {
   } catch (error) {
     console.error('查询文章失败:', error)
   }
+}
+
+// 分页改变时触发
+const handleChange = (page) => {
+  pagination.currentPage = page
+  handleSearch()
 }
 
 const formItem = [
