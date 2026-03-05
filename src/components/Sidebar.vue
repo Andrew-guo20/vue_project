@@ -29,6 +29,7 @@ const router = useRouter()
 
 const iconUrl = new URL('@/assets/images/robot.png', import.meta.url).href
 
+// 这里已经return出来isCollapse
 const isCollapse = computed(() => useAdminStore().isCollapse)
 
 const selectMenu = (path) => {
