@@ -55,3 +55,8 @@ export function getConsultations(params) {
   // 一定要注意 接口的请求方式
   return service.get('/psychological-chat/sessions', { params })
 }
+
+export function getSessionDetail(sessionId) {
+  // 一定要注意 接口的请求方式
+  return service.get(`/psychological-chat/sessions/${sessionId}/messages`)
+}
