@@ -8,6 +8,7 @@ const backendRouter = createRouter({
   routes: [
     {
       path: '/back',
+      redirect: '/back/dashboard',
       component: BackendLayout,
       children: [
         {
@@ -67,5 +68,34 @@ const backendRouter = createRouter({
     }
   ]
 })
+
+// 路由前置守卫
+backendRouter.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token')
+  // 当前用户是否登录 有token表示用户已登录
+  if (token) {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'))
+    // 如果是后台用户
+    if (userInfo.userType === 2) {
+      if (to.path.startsWith('/back')) {
+        next()
+      } else {
+        next('/back/dashboard')
+      }
+    }
+    // 如果是前台用户
+    else if (userInfo.userType === 1) {
+
+    }
+  } else {
+    if (to.path.startsWith('/back')) {
+      // 如果是后台路由，且用户未登录，重定向到登录页
+      next('/auth/login')
+    } else {
+      next()
+    }
+  }
+})
+
 
 export default backendRouter

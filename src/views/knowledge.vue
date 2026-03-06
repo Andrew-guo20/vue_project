@@ -167,8 +167,6 @@ const tableData = ref([])
 // - 当用户在 TableSearch 组件中点击搜索按钮时，组件会触发 search 事件
 // - 事件参数就是用户在表单中输入的所有数据
 const handleSearch = async (formData = {}) => {
-  console.log('formData:', formData)
-  console.log('pagination:', pagination)
   try {
     const params = {
       ...pagination,
