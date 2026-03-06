@@ -72,7 +72,22 @@ const frontendRouter = [
     path: '/',
     component: FrontendLayout,
     children: [
-
+      {
+        path: '',
+        component: () => import('@/views/home.vue'),
+      },
+      {
+        path: 'consultation',
+        component: () => import('@/views/consultation.vue'),
+      },
+      {
+        path: 'emotion-diary',
+        component: () => import('@/views/emotionDiary.vue'),
+      },
+      {
+        path: 'knowledge',
+        component: () => import('@/views/frontendKnowledge.vue'),
+      },
     ]
   }
 ]
