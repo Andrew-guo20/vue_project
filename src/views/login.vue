@@ -79,7 +79,7 @@ const submitForm = async (formRef) => {
           console.log(1111)
           router.push('/back/dashboard')
         } else {
-          
+          router.push('/')
         }
       })
     } else {

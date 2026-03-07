@@ -113,7 +113,12 @@ router.beforeEach((to, from, next) => {
     }
     // 如果是前台用户
     else if (userInfo.userType === 1) {
-
+      // 对于用户端账号 只能访问前台路由
+      if (to.path.startsWith('/back') || to.path.startsWith('/auth')) {
+        next('/')
+      } else {
+        next()
+      }
     }
   } else {
     if (to.path.startsWith('/back')) {
