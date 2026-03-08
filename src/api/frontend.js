@@ -28,3 +28,8 @@ export function getSessionDetail(sessionId) {
 export function getSessionEmotion(sessionId) {
   return service.get(`/psychological-chat/session/${sessionId}/emotion`)
 }
+
+// 创建或更新情绪日记
+export function addEmotionDiary(data) {
+  return service.post('/emotion-diary', data)
+}
