@@ -12,6 +12,54 @@
           在线服务中
         </div>
        </div>
+       <!-- 情绪花园 -->
+        <div class="emotion-garden">
+          <div class="garden-header">
+            <div class="garden-title">情绪花园</div>
+          </div>
+          <div class="emotion-info">
+            <div class="emotion-name">中性</div>
+            <div class="emotion-score">50</div>
+          </div>
+          <div class="warm-tips">
+            <div class="emotion-status-text">
+              <span class="status-label">今天感觉</span>
+              <span class="status-emotion">{{ currentEmotion.isNegative ?'需要关注':'很不错' }}</span>
+            </div>
+            <div class="emotion-intensity">
+              <span class="intensity-dots">
+                <span v-for="dot in 3" :key="dot" class="dot" :class="{'active':getIntensityClass(currentEmotion.emotionScore) >=dot}"></span>
+              </span>
+              <span class="intensity-text">{{ getRiskText(currentEmotion.riskLevel) }}</span>
+            </div>
+            <!-- 温暖建议卡片 -->
+            <div class="warm-suggestion" v-if="currentEmotion.suggestion">
+              <div class="suggestion-icon">💝</div>
+              <div class="suggestion-content">
+                <div class="suggestion-title">给你的小建议</div>
+                <div class="suggestion-text">{{ currentEmotion.suggestion }}</div>
+              </div>
+            </div>
+            <!-- 治愈行动 -->
+            <div class="healing-actions" v-if="currentEmotion.improvementSuggestions.length > 0">
+              <div class="action-title">治愈小行动</div>
+              <div class="actions-list">
+                <div class="action-item" v-for="action in currentEmotion.improvementSuggestions" :key="action">
+                  <div class="action-icon">✨</div>
+                  <div class="action-text">{{ action }}</div>
+                </div>
+              </div>
+            </div>
+            <!-- 风险提示 -->
+            <div class="risk-notice" v-if="currentEmotion.isNegative && currentEmotion.riskLevel > 1  ">
+              <div class="notice-icon">🤗</div>
+              <div class="notice-content">
+                <div class="notice-title">温馨提示</div>
+                <div class="notice-text">{{ currentEmotion.riskDescription }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
        <!-- 会话列表 -->
         <div class="session-history">
           <h4 class="session-title">会话列表</h4>
@@ -132,12 +180,30 @@
 import { ChatRound, Clock, DeleteFilled, Promotion } from '@element-plus/icons-vue'
 import {ref,onMounted} from 'vue'
 import { ElMessage } from 'element-plus'
-import { startSession, getSessionList,deleteSession,getSessionDetail } from '@/api/frontend'
+import { startSession, getSessionList,deleteSession,getSessionDetail,getSessionEmotion } from '@/api/frontend'
 import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
-import { id } from 'element-plus/es/locales.mjs'
+import { fetchEventSource } from '@microsoft/fetch-event-source'
 const iconUrl1 = new URL('@/assets/images/robot-fill.png', import.meta.url).href
 const iconUrl2 = new URL('@/assets/images/like.png', import.meta.url).href
 const iconUrl3 = new URL('@/assets/images/users.png', import.meta.url).href
+
+// 定义消息列表
+const message = ref([])
+// 定义用户输入
+const userMessage = ref('')
+// 定义会话列表
+const sessionList = ref([])
+// 定义是否正在输入中 ai发送状态
+const isAiTyping = ref(false)
+// 情绪花园
+const currentEmotion = ref({
+  primaryEmotion:'中性',
+  emotionScore:50,
+  isNegative:false,
+  riskLevel:0,
+  suggestion:'情绪状态平稳',
+  improvementSuggestions:[]
+})
 
 // 定义一个当前会话对象
 const currentSession = ref(null)
@@ -151,14 +217,50 @@ const createNewFrontendSession = ()=> {
     sessionTitle:'新会话'
   }
   currentSession.value = newSession
+  // 清空消息列表
+  message.value = []
+  // 清空用户输入
+  userMessage.value = ''
+  // 给用户反馈
+  // ElMessage.success('已创建新会话')
 }
-// 定义对话消息
-const message = ref([])
-const sessionList = ref([])
-// 定义用户输入
-const userMessage = ref('')
-// 定义是否正在输入中 ai发送状态
-const isAiTyping = ref(false)
+const loadSessionEmotion = (sessionId)=>{
+  // 确保sessionId格式正确
+  const id = sessionId.toString().startsWith('session_') ? sessionId : `session_${sessionId}`
+  getSessionEmotion(id).then(res =>{
+    console.log('12445',res)
+    // 防止 res.data 为 undefined 导致 currentEmotion 变成 undefined
+    if (res && res.data) {
+      currentEmotion.value = res.data
+    } else {
+      // 如果没有数据，保持默认值
+      console.warn('情绪分析数据为空')
+    }
+  })
+}
+const getIntensityClass = (score)=>{
+  if(score >= 61){
+    return 3
+  }
+  if(score >= 31){
+    return 2
+  } 
+  return 1
+}
+const getRiskText = (level)=>{
+  switch(level){
+    case 0:
+      return '正常'
+    case 1:
+      return '关注'
+    case 2:
+      return '预警'
+    case 3:
+      return '危机'
+    default:
+      return '正常'
+  }
+}
 // 定义处理键盘事件
 // const handleKeyDown = (e) => {
 //   if (e.key === 'Enter' && !e.shiftKey) {
@@ -168,7 +270,9 @@ const isAiTyping = ref(false)
 
 // 用户发送消息
 const sendMessage = ()=> {
-  if(!userMessage.value.trim()) return
+  if(!userMessage.value.trim()) {
+    return
+  }
   if(isAiTyping.value) {
     ElMessage.error('AI助手正在输入中，请稍后')
     return
@@ -180,13 +284,23 @@ const sendMessage = ()=> {
   // 如果没有会话或者时临时会话，就需要创建一个新的会话
   if(!currentSession.value || currentSession.value.status === 'TEMP'){
     startNewSession(messageContent)
+  }else {
+    // 继续现有会话
+    message.value.push({
+      id:Date.now(),
+      senderType:1,
+      content:messageContent,
+      createdAt:new Date().toISOString()
+    })
+    // 调用流式接口获取AI回复
+    startAiResponse(currentSession.value.sessionId, messageContent)
   }
 }
 
 const startNewSession = (messageContent)=>{
   // 构建一个会话参数
   const sessionParams = {
-    initialMessage:messageContent
+    initialMessage: messageContent
   }
   if(currentSession.value.sessionTitle === '新会话'){
     sessionParams.sessionTitle = `AI助手 - ${new Date().toLocaleString()}`
@@ -212,11 +326,19 @@ const startNewSession = (messageContent)=>{
     }
     // 更新会话列表
     getSessionPage()
-    // 开始流式对话
-    startAiResponse(currentSession.value.sessionId,message)
+    // 添加初始用户消息
+    message.value.push({
+      id:Date.now(),
+      senderType:1,
+      content:messageContent,
+      createdAt:new Date().toISOString()
+    })
+    // 开始流式对话 - 传递消息内容字符串，不是 ref 对象
+    startAiResponse(currentSession.value.sessionId,messageContent)
   })
 }
 const startAiResponse = (sessionId,userMessage)=>{
+  console.log('@@@@@@@sessionId',userMessage)
   // 防止重复发送
   if(isAiTyping.value) {
     ElMessage.error('AI助手正在输入中，请稍后')
@@ -233,6 +355,76 @@ const startAiResponse = (sessionId,userMessage)=>{
   message.value.push(aiMessage)
 
   // 调用流式接口
+  const ctrl = new AbortController() // 用来终止fetch请求
+  fetchEventSource('/api/psychological-chat/stream',{
+    method:'POST',
+    headers:{
+      'Content-type':'application/json',
+      'Token':localStorage.getItem('token'),
+      'Accept':'text/event-stream'
+    },
+    body:JSON.stringify({
+      sessionId,
+      userMessage
+    }),
+    signal:ctrl.signal,
+    onopen:(response) => {
+      console.log(response)
+      if(response.headers.get('Content-Type') !== 'text/event-stream'){
+        ElMessage.error('请求失败，返回类型错误')
+      }
+    },
+    onmessage:(event)=>{
+      const raw = event.data.trim()
+      if(!raw) return
+      const eventName = event.event
+      
+      // 处理 done 事件
+      if(eventName === 'done'){
+        isAiTyping.value = false
+        ctrl.abort()
+        // 情绪分析
+        loadSessionEmotion(currentSession.value.sessionId)
+        return
+      }
+      
+      try {
+        const payLoad = JSON.parse(raw)
+        const ok = String(payLoad.code) === '200'
+        if(ok && payLoad.data){
+          // 当前会话的AI消息
+          const aiMessage = message.value[message.value.length - 1]
+          if(aiMessage && payLoad.data.content){
+            aiMessage.content += payLoad.data.content
+          }
+        }else if(!ok){
+          // 错误回复
+          handleError(payLoad.message || 'AI回复失败')
+        }
+      } catch(e) {
+        console.error('解析消息失败:', e, raw)
+      }
+    },
+    onerror:(err)=>{
+      handleError(err || 'AI回复失败')
+      throw err
+    },
+    onclose:()=>{
+      // 开始情绪分析
+      loadSessionEmotion(currentSession.value.sessionId)
+    }
+  })
+}
+
+// 错误回复处理函数
+const handleError = (error)=>{
+  // 当前会话的AI消息
+  const aiMessage = message.value[message.value.length - 1]
+  if(aiMessage){
+    aiMessage.content = 'AI回复失败,请重试'
+  }
+  isAiTyping.value = false
+  ElMessage.error('AI回复失败,请重试')
 }
 
 const getSessionPage = ()=>{
@@ -247,14 +439,24 @@ const getSessionPage = ()=>{
 
 // 获取会话数据
 const handleSessionclick = (session)=>{
-  console.log(session)
-  getSessionDetail(session.id).then(res =>{
-    console.log(res)
-    message.value = res.data || []
+  console.log('点击会话:', session)
+  // 使用 sessionId 而不是 id
+  const sessionId = session.sessionId || session.id
+  if (!sessionId) {
+    console.error('会话ID不存在')
+    return
+  }
+  
+  getSessionDetail(sessionId).then(res =>{
+    console.log('会话详情:', res)
+    // 根据实际响应结构获取消息列表
+    message.value = res || []
   })
+  // 加载会话情绪分析结果
+  loadSessionEmotion(sessionId)
   // 更新当前会话对象数据
   const sessionData = {
-      sessionId:"session_"+ session.id,
+      sessionId: sessionId,
       status:'ACTIVE',
       sessionTitle:session.sessionTitle
     }
