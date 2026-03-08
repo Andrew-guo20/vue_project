@@ -11,7 +11,7 @@
       <div class="recommend-section">
         <div class="section-title">推荐阅读</div>
         <div class="recommend-list">
-          <div class="recommend-item"  v-for="item in recommendList" :key="item.id">
+          <div class="recommend-item"  v-for="item in recommendList" :key="item.id" @click="goToArticle(item.id)">
             <h4>{{item.title}}</h4>
             <p class="read-count">
               <el-icon><Histogram/></el-icon>
@@ -22,7 +22,7 @@
       </div>
       <!-- 右侧文章列表 -->
       <div class="article-list">
-        <div class="article-item" v-for="item in articleList" :key="item.id">
+        <div class="article-item" v-for="item in articleList" :key="item.id" @click="goToArticle(item.id)">
           <el-image :src="getImage(item.coverImage)" style="width: 240px; height: 150px;"></el-image>
           <div class="info">
             <div class="title">
@@ -69,6 +69,8 @@ import { getKnowledgeList } from '@/api/frontend'
 import { Avatar, Histogram, Platform } from '@element-plus/icons-vue'
 import { fileBaseUrl } from '@/config'
 import dayjs from 'dayjs'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 const iconUrl = new URL('/src/assets/images/book.png', import.meta.url).toString()
 
@@ -103,6 +105,12 @@ const handleChange = (page) => {
   pagination.currentPage = page
   getPageList()
 }
+
+// 跳转到详情页面
+const goToArticle = (id) => {
+  router.push(`/knowledge/article/${id}`)
+}
+
 onMounted(() => {
   // 获取推荐阅读列表
   const params = {

@@ -38,3 +38,8 @@ export function addEmotionDiary(data) {
 export function getKnowledgeList(params) {
   return service.get('/knowledge/article/page', { params })
 }
+
+//获取知识文章详情
+export function getArticleDetail(articleId) {
+  return service.get(`/knowledge/article/${articleId}`)
+}

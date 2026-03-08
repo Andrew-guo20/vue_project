@@ -88,6 +88,11 @@ const frontendRouter = [
         path: 'knowledge',
         component: () => import('@/views/frontendKnowledge.vue'),
       },
+      {
+        path: 'knowledge/article/:id',
+        component: () => import('@/views/articleDetail.vue'),
+        props: true, // 开启路由模式，可以通过props获取路由参数id
+      }
     ]
   }
 ]
