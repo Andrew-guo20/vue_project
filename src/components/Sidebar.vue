@@ -1,5 +1,5 @@
 <template>
-  <el-aside :width="isCollapse ? '64px' : '264'">
+  <el-aside :width="isCollapse ? '64px' : '264px'">
     <el-menu
         default-active="2"
         class="menu-style"
@@ -13,11 +13,11 @@
           <p class="brand-subtitle">管理后台</p>
         </div>
       </div>
-        <el-menu-item @click="selectMenu(item.path)" v-for="item in router.options.routes[0].children" :key="item.path" :index="item.path">
-          <el-icon><component :is="item.meta.icon" /></el-icon>
-          <span>{{ item.meta.title }}</span>
-        </el-menu-item>
-      </el-menu>
+      <el-menu-item @click="selectMenu(item.path)" v-for="item in router.options.routes[0].children" :key="item.path" :index="item.path">
+        <el-icon><component :is="item.meta.icon" /></el-icon>
+        <span>{{ item.meta.title }}</span>
+      </el-menu-item>
+    </el-menu>
   </el-aside>
 </template>
 

@@ -26,7 +26,7 @@
 <script setup>
 import { useAdminStore } from '@/stores/admin'
 import { useRouter ,useRoute } from 'vue-router'
-import { ElMessageBox,ElMessage } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
 import { logout } from '@/api/admin'
 
 const router = useRouter()
