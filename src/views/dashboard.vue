@@ -122,11 +122,8 @@ const iconUrl2 = new URL('@/assets/images/like.png', import.meta.url).href
 const iconUrl3 = new URL('@/assets/images/comments.png', import.meta.url).href
 const iconUrl4 = new URL('@/assets/images/smile.png', import.meta.url).href
 
+// 接口数据
 const aiData = ref({})
-
-// 情绪趋势
-let emotionChart = null
-const emotionChartRef = ref(null)
 
 // 初始化图表
 const initChart = () => {
@@ -136,6 +133,9 @@ const initChart = () => {
 }
 
 // 初始化情绪趋势图表
+// 情绪趋势
+let emotionChart = null
+const emotionChartRef = ref(null)
 const initEmotionChart = () => {
   if(!emotionChartRef.value) return
   // 销毁现有的图表
