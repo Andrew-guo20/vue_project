@@ -64,6 +64,7 @@ const currentArticle = ref(null)
 // 新增成功后刷新列表
 const handleSuccess = () => {
   dialogVisible.value = false
+  ElMessage.success('操作成功')
   // 刷新列表
   handleSearch()
 }
