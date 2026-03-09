@@ -19,7 +19,6 @@
 </template>
 
 <script setup>
-
 const robotUrl = new URL('@/assets/images/robot-fill.png', import.meta.url).href
 </script>
 

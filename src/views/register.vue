@@ -73,38 +73,19 @@ const submitForm = async (formEl) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (valid) {
-      register(formData).then(({data}) => {
-        if(!data){
+      register(formData).then((data) => {
+        if(data){
           ElMessage.success('注册成功')
           // 注册成功后跳转登录页
           router.push('/auth/login')
-        }
-        console.log(data)
-        if(data.code === 'BUSINESS_ERROR'){
+        }else{
           ElMessage.error(data.msg || '注册失败')
         }
+        console.log(data)
       })
     } 
   })
 }
-// const submitForm = async (formEl) => {
-//   if (!formEl) return
-//   formEl.validate((valid) => {
-//     if (valid) {
-//       register(formData).then((response) => {
-//         console.log('注册成功:', response)
-//         ElMessage.success('注册成功')
-//         // 注册成功后跳转登录页
-//         router.push('/auth/login')
-//       }).catch((error) => {
-//         console.error('注册失败:', error)
-//         ElMessage.error(error.msg || '注册失败，请稍后重试')
-//       })
-//     } else {
-//       ElMessage.error('请检查表单填写')
-//     }
-//   })
-// }
 </script>
 
 <style lang="scss" scoped>

@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="title">
-      <div class="back-home">
+      <div class="back-home" @click="goBack">
         <el-icon><Back/></el-icon>
         <span>返回首页</span>
       </div>
@@ -38,6 +38,11 @@ import { Back } from '@element-plus/icons-vue';
 // 引入登录接口
 import { login } from '@/api/admin'
 import { useRouter } from 'vue-router'
+
+// 返回首页
+const goBack = () => {
+  router.push('/')
+}
 
 // - 在模板中通过 ref="ruleFormRef" 绑定到 <el-form> 组件
 // - 这样可以在脚本中访问到表单的实例对象
