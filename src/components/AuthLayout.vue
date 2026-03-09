@@ -10,7 +10,7 @@
       </div>
     </div>
     <div class="right-section">
-      <!-- 子路由出口 -->
+    <!-- 子路由出口 -->·  
       <router-view></router-view>
     </div>
     
